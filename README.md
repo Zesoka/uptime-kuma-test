@@ -34,9 +34,11 @@ docker compose down -v
 
 ## Monitores sugeridos para probar
 
-1. **HTTP simple** → `http://demo-web` (usar el nombre del servicio dentro de la red de Docker, o `http://localhost:8080` si el monitor se define desde fuera del contenedor de Kuma).
-2. **Códigos de error** → `http://demo-api/status/500` para ver cómo Uptime Kuma detecta caídas.
-3. **Latencia / timeout** → `http://demo-api/delay/5` para probar el umbral de timeout de un monitor.
+Dentro de la red de Docker, los monitores deben apuntar al nombre del servicio (no a `localhost`). Ojo con el puerto de `demo-api`: el contenedor escucha internamente en `8080` (se mapea a `8081` en el host), así que la URL interna necesita ese puerto explícito.
+
+1. **HTTP simple** → `http://demo-web` para ver un monitor sano.
+2. **Códigos de error** → `http://demo-api:8080/status/500` para ver cómo Uptime Kuma detecta caídas.
+3. **Latencia / timeout** → `http://demo-api:8080/delay/5`, con un "Request Timeout" del monitor menor a 5s (por ejemplo 3s), para provocar un timeout controlado.
 4. **Caída real** → `docker compose stop demo-web` y observar cómo Uptime Kuma marca el monitor como caído; `docker compose start demo-web` para recuperarlo.
 
 ## Notas
