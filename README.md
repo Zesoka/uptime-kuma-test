@@ -41,6 +41,24 @@ Dentro de la red de Docker, los monitores deben apuntar al nombre del servicio (
 3. **Latencia / timeout** → `http://demo-api:8080/delay/5`, con un "Request Timeout" del monitor menor a 5s (por ejemplo 3s), para provocar un timeout controlado.
 4. **Caída real** → `docker compose stop demo-web` y observar cómo Uptime Kuma marca el monitor como caído; `docker compose start demo-web` para recuperarlo.
 
+## Notificaciones
+
+Se configuró una notificación **Email (SMTP)** vía Gmail (`smtp.gmail.com:587`, STARTTLS) en Settings → Notifications, marcada como "Default" y aplicada a todos los monitores. La contraseña de aplicación de Gmail no se versiona en ningún archivo del repo; se carga a mano en el formulario de Uptime Kuma la primera vez.
+
+Todos los monitores usan intervalo de chequeo de **20 segundos** y `Retries: 0`, para que una caída se detecte y notifique lo antes posible.
+
+## Monitoreo de un stack de Wazuh (SIEM) externo
+
+Si además tenés un stack de [Wazuh](https://github.com/wazuh/wazuh-docker) single-node corriendo en otra carpeta (manager + indexer + dashboard, con sus puertos publicados al host), podés monitorearlo desde este mismo Uptime Kuma sin unir las redes de Docker: como Uptime Kuma corre en un contenedor, usá `host.docker.internal` en vez de `localhost` para llegar a los puertos publicados por el otro compose.
+
+Monitores de tipo **TCP Port** (evita lidiar con los certificados autofirmados de Wazuh):
+
+| Monitor            | Host                    | Puerto |
+|---------------------|-------------------------|--------|
+| Wazuh Dashboard      | `host.docker.internal`  | 443    |
+| Wazuh Indexer        | `host.docker.internal`  | 9200   |
+| Wazuh Manager API    | `host.docker.internal`  | 55000  |
+
 ## Notas
 
 - Los datos de Uptime Kuma persisten en el volumen nombrado `uptime-kuma-data`.
