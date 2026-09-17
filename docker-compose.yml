@@ -24,5 +24,16 @@ services:
     ports:
       - "8081:8080"
 
+  # Simulates a periodic job (e.g. a backup script) that must "check in" via
+  # the Push monitor's URL. Stop this container to simulate the job silently
+  # failing, instead of a normal connection error.
+  heartbeat-pusher:
+    image: curlimages/curl:8.10.1
+    container_name: heartbeat-pusher
+    restart: unless-stopped
+    entrypoint: ["sh", "-c", "while true; do curl -fsS \"$$PUSH_URL\"; sleep 15; done"]
+    environment:
+      - PUSH_URL=http://uptime-kuma:3001/api/push/i9LNLCFZhm?status=up&msg=OK&ping=
+
 volumes:
   uptime-kuma-data:
